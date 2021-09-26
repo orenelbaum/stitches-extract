@@ -26,7 +26,7 @@ const importDeclarationVisitor = types => (path, { opts, file }) => {
       
         for (const referencePath of path.scope.bindings[specifierName].referencePaths) {
             const callExpression = referencePath.parent
-            if (callExpression.type !== "CallExpression") throw new Error("Css function is referenced without calling it.")
+            if (callExpression.type !== "CallExpression") throw new Error("'css' function is referenced without being called.")
 
             callExpression.arguments.push(types.stringLiteral(createUuid()))
         }
