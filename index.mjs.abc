@@ -1,0 +1,47 @@
+import { createStitches } from "@stitches/core";
+
+
+const {css, getCssText} = createStitches({ 
+    utils: {p: (value) => ({padding: value})},
+    media: {
+        bp1: '(min-width: 640px)',
+        bp2: '(min-width: 768px)',
+        bp3: '(min-width: 1024px)',
+      },
+})
+
+const a = css({
+    p: 1, 
+    variants: {
+        aaaaaaaaaaa: {bbbbbbbbbb: {vala: 11}, ccccc: {valb: 2}},
+        dddddd: {eeeee: {valc: 3}, ffffff: { vald: 6 }}
+    },
+    compoundVariants: [{
+        aaaaaaaaaaa: "bbbbbbbbbb",
+        dddddd: "eeeee",
+        css: {
+            padding: 8
+        }
+    }]
+})
+
+// console.log("a", a().className)
+// console.log(a().className)
+// console.log(a({ aaaaaaaaaaa: "bbbbbbbbbb" }).className.split(" "))
+// console.log(a({ aaaaaaaaaaa: {'@bp2': "bbbbbbbbbb"} }).className.split(" "))
+console.log(a({ aaaaaaaaaaa: "bbbbbbbbbb", dddddd: "eeeee" }).className.split(" "))
+
+
+
+// const b = css({margin: 1 })
+// // const c = css({p: 1 }, {margin: 1 })
+// const c = css({p: 1, margin: 1 })
+
+// // console.log("a", a().className)
+// // console.log("b", b().className)
+// // console.log("c", c().className)
+
+// //c-fRCjYa
+
+const styles = getCssText()
+console.log(styles)
