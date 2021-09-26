@@ -6,7 +6,7 @@ const path = require("path")
 const childProcess = require('child_process');
 const { transformFileAsync } = require("@babel/core");
 const process = require('process');
-const { executionResults } = require('./compile-css.mjs');
+// const { executionResults } = require('./compile-css.mjs');
 
 const { resolve } = path
 const { writeFileSync } = fs
@@ -94,29 +94,30 @@ process.send({ executionResults })
         const child = childProcess.fork("./stitches-extract/execute.mjs", undefined, { cwd: process.cwd() });
 
         // execute the callback once the process has finished running
-        child.on('message', executionResults => {
-            await Promise.all(
-                sourceFilePaths.map((sourceFilePath, sourceFileIndex) =>
-                    transformFileAsync(
-                        sourceFilePath,
-                        {
-                            // presets: ["@babel/preset-typescript"],
-                            presets: ["@babel/preset-react"],
-                            plugins: [
-                                [
-                                    "./src/lib/prepare-for-execution.babel-plugin.js",
-                                    { 
-                                        markFileAsStatic:
-                                            () => staticStyleFileIndices.add(sourceFileIndex)
-                                    }
-                                ]
-                            ],
-                            configFile: false
-                        }
-                    )
-                )
-            )
-        })
+        child.on('message', executionResults =>
+            console.log({ executionResults: JSON.stringify(executionResults) })
+            // Promise.all(
+                // sourceFilePaths.map((sourceFilePath, sourceFileIndex) =>
+                //     transformFileAsync(
+                //         sourceFilePath,
+                //         {
+                //             // presets: ["@babel/preset-typescript"],
+                //             presets: ["@babel/preset-react"],
+                //             plugins: [
+                //                 [
+                //                     "./src/lib/prepare-for-execution.babel-plugin.js",
+                //                     { 
+                //                         markFileAsStatic:
+                //                             () => staticStyleFileIndices.add(sourceFileIndex)
+                //                     }
+                //                 ]
+                //             ],
+                //             configFile: false
+                //         }
+                //     )
+                // )
+            // )
+        )
     }
 
 })()
