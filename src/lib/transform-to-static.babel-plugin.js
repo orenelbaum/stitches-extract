@@ -13,6 +13,13 @@ const importDeclarationVisitor = types => (path, { opts, file }) => {
     
     if (importSource !== pathToCompileCSS) return
 
+    const pathToExtractedCssFactory = relative(
+        outputFileDirAbsolutePath, 
+        resolve("./src/lib/extraced-css-factory.mjs")
+    ).replace(/\\/g, "/")
+
+    path.node.source.value = pathToExtractedCssFactory
+
     for (const specifier of path.node.specifiers) {
         const specifierName = specifier.imported.name
         if (specifierName !== "css") continue

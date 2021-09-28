@@ -93,9 +93,11 @@ process.send({ executionResults, css: getCssText() })
     {
         const child = childProcess.fork("./stitches-extract/execute.mjs", undefined, { cwd: process.cwd() });
 
-        const outputFilePaths = await getFiles("./stitches-extract")
-        child.on('message', ({ executionResults, css }) => {
+        child.on('message', async ({ executionResults, css }) => {
             fs.rmSync("./stitches-extract/execute.mjs")
+
+            const outputFilePaths = await getFiles("./stitches-extract")
+
             writeFileSync("./stitches-extract/extracted-styles.css", css)
             outputFilePaths.map((outputFilePath) => {
                 const { code } = transformFileSync(
