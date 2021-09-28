@@ -23,8 +23,6 @@ const importDeclarationVisitor = types => (path, { opts, file }) => {
 
             const uuid = callExpression.arguments[callExpression.arguments.length - 1].value
             const stringifiedResult = `(${JSON.stringify(opts.executionResults[uuid])})`
-            // console.log(stringifiedResult)
-            // console.log({a: parser.parse(stringifiedResult).program.body[0].expression})
 
             callExpression.arguments = [
                 parser.parse(stringifiedResult).program.body[0].expression

@@ -95,6 +95,7 @@ process.send({ executionResults, css: getCssText() })
 
         const outputFilePaths = await getFiles("./stitches-extract")
         child.on('message', ({ executionResults, css }) => {
+            fs.rmSync("./stitches-extract/execute.mjs")
             writeFileSync("./stitches-extract/extracted-styles.css", css)
             outputFilePaths.map((outputFilePath) => {
                 const { code } = transformFileSync(
