@@ -8,14 +8,13 @@ const { transformFileAsync, transformFileSync } = require("@babel/core")
 const process = require('process')
 const commandLineArgs = require('command-line-args')
 
-const { resolve } = path
+const { resolve, relative } = path
 const { writeFileSync } = fs
 
 const optionDefinitions = [
     { name: 'stitchesExtractFolder', type: String },
-    // { name: 'configuredStitchesPath', type: String },
-    // { name: 'utilsInputDir', type: String },
-    // { name: 'utilsOutputDir', type: String }
+    { name: 'sourceFolder', type: String },
+    { name: 'configuredStitchesPath', type: String }
 ]
 
 const options = commandLineArgs(optionDefinitions)
@@ -44,7 +43,7 @@ const getFiles = (() => {
 
 
 ;(async () => {
-    const sourceFilePaths = await getFiles("./src/example")
+    const sourceFilePaths = await getFiles(options.sourceFolder)
     const staticStyleFileIndices = new Set()
 
     // Prepare static files for execution and mark them as static
@@ -70,7 +69,7 @@ const getFiles = (() => {
         )
     )
 
-    const sourceFolderAbsolutePath = path.resolve("./src/example")
+    const sourceFolderAbsolutePath = path.resolve(options.sourceFolder)
 
     // Add all transformed files to the extraction folder
     for (const staticStyleFileIndex of staticStyleFileIndices.values()) {
@@ -103,10 +102,10 @@ const getFiles = (() => {
             }
         }
 
-        // const stitchesPath = path.resolve("./src/example/stitches.js")
+        const pathFromStitchesExtractToSrc = relative(options.stitchesExtractFolder, options.configuredStitchesPath).replace(/\\/g, "/")
 
-        writeFileSync("./stitches-extract/execute.mjs", `
-import { getCssText } from "../src/example/stitches.mjs"
+        writeFileSync(`${options.stitchesExtractFolder}/execute.mjs`, `
+import { getCssText } from "${pathFromStitchesExtractToSrc}"
 import { executionResults } from "../src/lib/compile-css.mjs"
 
 // Import all of the transformed files, which will call the 'css' function from the
@@ -123,17 +122,17 @@ process.send({ executionResults, css: getCssText() })
     // Execute the execution script
     {
         // Execute the execution script
-        const child = childProcess.fork("./stitches-extract/execute.mjs", undefined, { cwd: process.cwd() });
+        const child = childProcess.fork(`${options.stitchesExtractFolder}/execute.mjs`, undefined, { cwd: process.cwd() });
 
         // Add the event that will be called when the execution script ends.
         child.on('message', async ({ executionResults, css }) => {
             // Remove the execution script since it already has been executed at this point.
-            fs.rmSync("./stitches-extract/execute.mjs")
+            fs.rmSync(`${options.stitchesExtractFolder}/execute.mjs`)
 
             const outputFilePaths = await getFiles(options.stitchesExtractFolder)
 
             // Create the CSS file that contains all of the extracted CSS
-            writeFileSync("./stitches-extract/extracted-styles.css", css)
+            writeFileSync(`${options.stitchesExtractFolder}/extracted-styles.css`, css)
 
             // Replace the execution files with the actual extracted `css` functions
             outputFilePaths.map((outputFilePath) => {
@@ -141,7 +140,6 @@ process.send({ executionResults, css: getCssText() })
                 const { code } = transformFileSync(
                     outputFilePath,
                     {
-                        // presets: ["@babel/preset-typescript"],
                         presets: ["@babel/preset-react"],
                         plugins: [
                             [

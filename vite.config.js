@@ -1,11 +1,17 @@
 import { defineConfig } from 'vite'
-import babel from 'rollup-plugin-babel';
+import babel from 'rollup-plugin-babel'
 
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode: _mode }) => ({
 	plugins: [
 		babel({
-			plugins: ["./src/lib/add-static-imports.babel-plugin.js"]
+			plugins: [[
+				"./src/lib/add-static-imports.babel-plugin.js",
+				{ 
+					stitchesExtractFolder: "./stitches-extract",
+					sourceFolder: "./src/example"
+				}
+			]]
 		})
 	],
 	resolve: {
