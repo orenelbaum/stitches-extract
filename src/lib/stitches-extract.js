@@ -22,8 +22,8 @@ const options = commandLineArgs(optionDefinitions)
 
 // Delete and create again the folder for extracted styles
 {
-    fs.rmdirSync("./stitches-extract", { recursive: true })
-    fs.mkdirSync("./stitches-extract", { recursive: true })
+    fs.rmdirSync(options.stitchesExtractFolder, { recursive: true })
+    fs.mkdirSync(options.stitchesExtractFolder, { recursive: true })
 }
 
 // A function that gets all the file paths in a given directory
@@ -130,7 +130,7 @@ process.send({ executionResults, css: getCssText() })
             // Remove the execution script since it already has been executed at this point.
             fs.rmSync("./stitches-extract/execute.mjs")
 
-            const outputFilePaths = await getFiles("./stitches-extract")
+            const outputFilePaths = await getFiles(options.stitchesExtractFolder)
 
             // Create the CSS file that contains all of the extracted CSS
             writeFileSync("./stitches-extract/extracted-styles.css", css)

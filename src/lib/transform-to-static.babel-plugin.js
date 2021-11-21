@@ -20,7 +20,7 @@ const importDeclarationVisitor = _types => (path, { opts, file }) => {
     {
         const pathToExtractedCssFactory = relative(
             outputFileDirAbsolutePath, 
-            resolve("./src/lib/extraced-css-factory.mjs")
+            resolve("./src/lib/extracted-css-factory.mjs")
         ).replace(/\\/g, "/")
     
         path.node.source.value = pathToExtractedCssFactory
