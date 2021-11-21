@@ -1,8 +1,13 @@
 import { css as stitchesCss } from '../example/stitches.mjs'
 
 
+// This object contains all of the resulting class names.
 export const executionResults = {}
 
+// During the execution phase of the plugin, this function will replace the `css`
+// function imported from Stitches.
+// It exectues the Stitches `css` function and stores the resulting classes in the
+// `executionResults` object.
 export const css = (styles, uuid) => {
     const cssReturn = stitchesCss(styles)
     

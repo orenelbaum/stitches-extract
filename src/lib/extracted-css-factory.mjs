@@ -1,3 +1,4 @@
+
 export const extractedCss = classes => variantOptions => {
     const className = classes.noVariant
     
