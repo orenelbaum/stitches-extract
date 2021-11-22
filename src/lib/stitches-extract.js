@@ -4,12 +4,13 @@ const fs = require('fs')
 const { promisify } = require('util')
 const path = require("path")
 const childProcess = require('child_process')
-const { transformFileAsync, transformFileSync } = require("@babel/core")
+const { transformFileAsync, transformFileSync, transformAsync } = require("@babel/core")
 const process = require('process')
 const commandLineArgs = require('command-line-args')
 
 const { resolve, relative } = path
 const { writeFileSync } = fs
+
 
 const optionDefinitions = [
     { name: 'stitchesExtractFolder', type: String },
@@ -33,7 +34,7 @@ const getFiles = (() => {
     
     return async dir => {
         const subdirs = await readdir(dir)
-        const files = await Promise.all(subdirs.map(async (subdir) => {
+        const files = await Promise.all(subdirs.map(async subdir => {
             const res = resolve(dir, subdir)
             return (await stat(res)).isDirectory() ? getFiles(res) : res
         }))
@@ -59,7 +60,35 @@ const getFiles = (() => {
                             "./src/lib/prepare-for-execution.babel-plugin.js",
                             { 
                                 markFileAsStatic:
-                                    () => staticStyleFileIndices.add(sourceFileIndex)
+                                    () => staticStyleFileIndices.add(sourceFileIndex),
+                                ...options
+                            }
+                        ]
+                    ],
+                    configFile: false
+                }
+            )
+        )
+    )
+
+    // Transform imports from src
+    const doubleTransformedResults = await Promise.all(
+        [...staticStyleFileIndices].map(resultIndex =>
+            transformAsync(
+                transformedResults[resultIndex].code,
+                {
+                    // presets: ["@babel/preset-typescript"],
+                    presets: ["@babel/preset-react"],
+                    plugins: [
+                        [
+                            "./src/lib/paparoni.babel-plugin.js",
+                            { 
+                                markFileAsStatic:
+                                    () => staticStyleFileIndices.add(sourceFileIndex),
+                                staticStyleFileIndices,
+                                sourceFilePaths,
+                                filePath: sourceFilePaths[resultIndex],
+                                ...options
                             }
                         ]
                     ],
@@ -72,6 +101,7 @@ const getFiles = (() => {
     const sourceFolderAbsolutePath = path.resolve(options.sourceFolder)
 
     // Add all transformed files to the extraction folder
+    let i = 0
     for (const staticStyleFileIndex of staticStyleFileIndices.values()) {
         // Get the absolute path to output the file to
         let outputFileAbsolutePath
@@ -81,11 +111,15 @@ const getFiles = (() => {
             outputFileAbsolutePath = `./stitches-extract/${sourceFileRelativePath}`
         }
 
-        const transformedCode = transformedResults[staticStyleFileIndex].code
+        const transformedCode = doubleTransformedResults[i].code
+
+        // console.log({transformedCode});
         
         // Create the output directory if it doesn't exist and write the transformed file
         fs.mkdirSync(outputFileAbsolutePath.match(/(.*)[\/\\]/)[1]||'', { recursive: true })
         writeFileSync(outputFileAbsolutePath, transformedCode)
+
+        i++
     }
 
     // Create the execution script
