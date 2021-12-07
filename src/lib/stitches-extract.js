@@ -142,10 +142,12 @@ const getFiles = (() => {
 import { getCssText } from "${pathFromStitchesExtractToSrc}"
 import { executionResults } from "../src/lib/compile-css.mjs"
 
-// Import all of the transformed files, which will call the 'css' function from the
-// 'compile-css' file, thus generating the css and storing the class names in the
-// 'executionResults' object
-${importList}
+${
+    // Import all of the transformed files, which will call the 'css' function from the
+    // 'compile-css' file, thus generating the css and storing the class names in the
+    // 'executionResults' object
+    importList
+}
 
 // Send the class names and the resulting CSS back to the parent
 process.send({ executionResults, css: getCssText() })
