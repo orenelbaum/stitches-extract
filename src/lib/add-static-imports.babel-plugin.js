@@ -3,36 +3,38 @@ const { existsSync } = require("fs")
 
 
 const importDeclarationVisitor = _types => (path, { opts, file }) => {
-    const importSource = path.node.source.value
+	const importSource = path.node.source.value
 
-    if (importSource[0] !== ".") return
-    
-    const sourceFileDirAbsolutePath = dirname(file.opts.filename)
+	if (importSource[0] !== ".") return
+	
+	const sourceFileDirAbsolutePath = dirname(file.opts.filename)
 
-    const importSourceAbsolutePath = resolve(sourceFileDirAbsolutePath, importSource)
+	const importSourceAbsolutePath = resolve(sourceFileDirAbsolutePath, importSource)
 
-    const sourceFolderAbsolutePath = resolve(opts.sourceFolder)
+	const sourceFolderAbsolutePath = resolve(opts.sourceFolder)
 
-    const sourceFileRelativePath = relative(
-        sourceFolderAbsolutePath, 
-        importSourceAbsolutePath
-    ).replace(/\\/g, "/")
+	const sourceFileRelativePath = relative(
+		sourceFolderAbsolutePath, 
+		importSourceAbsolutePath
+	)
+		.replace(/\\/g, "/")
 
-    const staticFileAbsolutePath = resolve(opts.stitchesExtractFolder, sourceFileRelativePath) + ".mjs"
+	const staticFileAbsolutePath = resolve(opts.stitchesExtractFolder, sourceFileRelativePath) + ".mjs"
 
-    if (!existsSync(staticFileAbsolutePath)) return
+	if (!existsSync(staticFileAbsolutePath)) return
 
-    const pathToStatic = relative(
-        sourceFileDirAbsolutePath,
-        staticFileAbsolutePath
-    ).replace(/\\/g, "/")
-    
-    path.node.source.value = pathToStatic
+	const pathToStatic = relative(
+		sourceFileDirAbsolutePath,
+		staticFileAbsolutePath
+	)
+		.replace(/\\/g, "/")
+	
+	path.node.source.value = pathToStatic
 }
 
 
 module.exports = function ({ types }) {	
-    const visitor = { ImportDeclaration: importDeclarationVisitor(types) }
+	const visitor = { ImportDeclaration: importDeclarationVisitor(types) }
 
-    return { visitor }
+	return { visitor }
 }
